@@ -1,0 +1,13 @@
+{
+  "name": "tvbox-arcade-builder",
+  "description": "Skill para agentes de IA transformarem TV Boxes Android (Rockchip RK3229/RK322x) em sistemas de arcade retrô dedicados via ADB, RetroArch e Pegasus Frontend.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anderson Machado",
+    "url": "https://github.com/Andersonkesto"
+  },
+  "homepage": "https://andersonmachado.web.app",
+  "repository": "https://github.com/Andersonkesto/tvbox-arcade-skill",
+  "license": "MIT",
+  "skills": "./skills/"
+}

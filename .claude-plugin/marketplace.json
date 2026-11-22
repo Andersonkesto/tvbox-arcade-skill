@@ -1,0 +1,15 @@
+{
+  "name": "andersonkesto-skills",
+  "owner": {
+    "name": "Anderson Machado",
+    "url": "https://github.com/Andersonkesto"
+  },
+  "plugins": [
+    {
+      "name": "tvbox-arcade-builder",
+      "source": "./",
+      "description": "Transforme TV Boxes Android RK3229 em arcades retrô dedicados via ADB, RetroArch e Pegasus Frontend.",
+      "version": "1.0.0"
+    }
+  ]
+}
