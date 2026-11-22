@@ -1,0 +1,5 @@
+general.theme: /storage/emulated/0/pegasus-frontend/themes/RGLegacy/
+general.locale: pt-BR
+general.fullscreen: true
+general.verify-files: true
+providers.androidapps.enabled: false
