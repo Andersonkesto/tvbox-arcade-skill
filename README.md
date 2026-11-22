@@ -4,6 +4,20 @@
 
 Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com **Antigravity**, **Gemini CLI**, **Claude Code** e **Codex**) para transformar TV Boxes Android de baixo custo — especialmente placas **Rockchip RK3229 / RK322x (Android 7.1, 32-bit `armeabi-v7a`, Mali-400, 1 GB RAM, Raw NAND)** — em sistemas dedicados de arcade/multijogos via ADB, sem arriscar brick na NAND interna.
 
+## Galeria de Referência (Hardware & Sistema em Funcionamento)
+
+| Placa-alvo (`R329Q_V3.0` · RK3229) | Tela de Inicialização (`bootanimation.ts`) |
+| :---: | :---: |
+| ![Placa R329Q V3.0 RK3229](./docs/images/board-r329q-v3.0.jpg) | ![Tela de inicialização personalizada](./docs/images/boot-splash-arcade.png) |
+
+| Tela de Carregamento do Pegasus (`logo.png`) | Sistema Pronto — Consoles (`RGLegacy`) |
+| :---: | :---: |
+| ![Tela de carregamento do Pegasus](./docs/images/pegasus-loading.png) | ![Sistema pronto com 8 plataformas](./docs/images/system-ready-consoles.png) |
+
+**Lista de jogos com capas automáticas (`boxfront` + `screenshot`):**
+
+![Lista de jogos no Pegasus Frontend](./docs/images/system-ready-games.png)
+
 ## O que esta skill automatiza
 
 - **Diagnóstico de hardware via ADB:** verifica SoC, arquitetura ABI, SDK do Android, RAM, espaço livre em `/system` e `/data`, armazenamento (`rknand` vs eMMC) e viabilidade de emulação.
