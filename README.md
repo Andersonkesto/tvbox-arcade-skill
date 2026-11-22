@@ -1,5 +1,7 @@
 # TV Box Arcade Skill (`tvbox-arcade-builder`)
 
+[Anderson Machado](https://andersonmachado.web.app/)
+
 Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com **Antigravity**, **Gemini CLI**, **Claude Code** e **Codex**) para transformar TV Boxes Android de baixo custo — especialmente placas **Rockchip RK3229 / RK322x (Android 7.1, 32-bit `armeabi-v7a`, Mali-400, 1 GB RAM, Raw NAND)** — em sistemas dedicados de arcade/multijogos via ADB, sem arriscar brick na NAND interna.
 
 ## O que esta skill automatiza
@@ -44,6 +46,10 @@ git clone https://github.com/Andersonkesto/tvbox-arcade-skill.git
 - **Este repositório NÃO contém nem distribui** ROMs, BIOS, músicas, artes proprietárias, APKs de terceiros ou chaves privadas de assinatura.
 - Todo binário de emulador/frontend é obtido pelo próprio usuário diretamente das fontes oficiais (Libretro Buildbot, Pegasus Frontend GitHub Releases, RGLegacy GitHub).
 - **Atenção em placas com Raw NAND (`rknand`):** operações em `/system` ou na partição `rknand_resource` exigem acesso `root` e **backup prévio obrigatório** descrito na skill. Use por sua conta e risco e nunca execute `dd` em partições sem validar o tamanho e o cabeçalho da sua placa.
+
+## Meu Site
+[Anderson Machado](https://andersonmachado.web.app/)
+
 
 ## Créditos e Licenças de Terceiros
 
