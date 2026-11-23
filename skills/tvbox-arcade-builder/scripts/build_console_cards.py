@@ -6,7 +6,11 @@ Example:
 import argparse
 import os
 import shutil
-from PIL import Image, ImageDraw, ImageFilter
+
+try:
+    from PIL import Image, ImageDraw, ImageFilter
+except ImportError as exc:
+    raise SystemExit("Missing dependency: Pillow. Install it with: pip install pillow") from exc
 
 DEFAULT_PLATFORMS = {
     "snes":      ("snes.png",      "snes.png",      "#b81d24", "#56080c"),

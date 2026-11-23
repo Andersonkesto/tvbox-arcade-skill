@@ -30,7 +30,8 @@ Never write to `rknand_resource` using hardcoded offsets across different boards
 Pegasus loads its precompiled splash resources from `lib/armeabi-v7a/libpegasus-fe_armeabi-v7a.so` (`assets/logo.png` is stored as an uncompressed Qt resource PNG, `700x227` in `1.0` releases, preceded by a 4-byte big-endian length).
 1. Back up `/sdcard/Android/data/org.pegasus_frontend.android/` before proceeding, because replacing the certificate requires uninstalling the original APK.
 2. Run `python scripts/patch_pegasus_logo.py --apk Pegasus.apk --image custom_logo.png --out-unsigned Pegasus-unsigned.apk`.
-3. Sign `Pegasus-unsigned.apk` with your own keystore (`apksigner` or `SignApk`), install, restore `settings.txt` & `game_dirs.txt`, grant storage permissions, and re-set Home activity if needed.
+3. Align the APK for native `.so` page alignment: `zipalign -p 4 Pegasus-unsigned.apk Pegasus-aligned.apk`.
+4. Sign `Pegasus-aligned.apk` with your own keystore (`apksigner sign --ks my.jks --out Pegasus-signed.apk Pegasus-aligned.apk`), install, restore `settings.txt` & `game_dirs.txt`, grant storage permissions, and re-set Home activity if needed.
 
 ## 5. Rollback Commands
 - **Restore original launcher:**

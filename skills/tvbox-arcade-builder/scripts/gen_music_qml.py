@@ -9,6 +9,10 @@ import json
 import os
 
 
+def normalize_extensions(raw: str) -> set[str]:
+    return {("." + e.strip().lower().lstrip(".")) for e in raw.split(",") if e.strip()}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate single-track-at-a-time Music.qml for Pegasus themes.")
     parser.add_argument("--music-dir", required=True, help="Local directory containing audio files")
@@ -19,16 +23,19 @@ def main():
     )
     parser.add_argument("--out", required=True, help="Output Music.qml path")
     parser.add_argument("--volume", type=float, default=0.5, help="Playback volume 0.0-1.0 (default: 0.5)")
-    parser.add_argument("--extensions", default=".ogg,.mp3", help="Comma-separated audio extensions")
+    parser.add_argument("--extensions", default=".ogg,.mp3", help="Comma-separated audio extensions (e.g., ogg,mp3)")
     args = parser.parse_args()
 
-    exts = {e.strip().lower() for e in args.extensions.split(",") if e.strip()}
+    if not os.path.isdir(args.music_dir):
+        raise SystemExit(f"Music directory not found: {args.music_dir}")
+
+    exts = normalize_extensions(args.extensions)
     files = sorted(
         f for f in os.listdir(args.music_dir)
         if os.path.isfile(os.path.join(args.music_dir, f)) and os.path.splitext(f)[1].lower() in exts
     )
     if not files:
-        raise SystemExit(f"No audio files matching {exts} found in {args.music_dir}")
+        raise SystemExit(f"No audio files matching {sorted(exts)} found in {args.music_dir}")
 
     base_uri = args.android_music_uri if args.android_music_uri.endswith("/") else args.android_music_uri + "/"
     tracks_json = json.dumps(files, ensure_ascii=False)

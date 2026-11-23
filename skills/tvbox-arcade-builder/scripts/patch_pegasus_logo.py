@@ -1,5 +1,5 @@
 """Dynamically replace the embedded loading logo PNG inside Pegasus Frontend's
-native Android library (.so) and produce an unsigned APK ready for signing.
+native Android library (.so) and produce an unsigned APK ready for zipalign + signing.
 
 Note: Always back up /sdcard/Android/data/org.pegasus_frontend.android/ before
 uninstalling the official APK, because re-signing uses a different certificate.
@@ -9,7 +9,24 @@ import io
 import os
 import struct
 import zipfile
-from PIL import Image, ImageDraw
+
+try:
+    from PIL import Image, ImageDraw
+except ImportError as exc:
+    raise SystemExit("Missing dependency: Pillow. Install it with: pip install pillow") from exc
+
+SIGNATURE_EXTS = (".sf", ".rsa", ".dsa", ".ec", ".sig")
+
+
+def is_apk_signature_entry(filename: str) -> bool:
+    """Return True only for APK v1 signature files inside META-INF/."""
+    upper = filename.upper()
+    if not upper.startswith("META-INF/"):
+        return False
+    base = filename[len("META-INF/"):]
+    if "/" in base:
+        return False
+    return base.upper() == "MANIFEST.MF" or base.lower().endswith(SIGNATURE_EXTS)
 
 
 def find_target_logo_slot(so_data: bytes) -> tuple[int, int, tuple[int, int]]:
@@ -98,7 +115,7 @@ def main():
         os.makedirs(os.path.dirname(os.path.abspath(args.out_unsigned)), exist_ok=True)
         with zipfile.ZipFile(args.out_unsigned, "w") as zout:
             for item in zin.infolist():
-                if item.filename.startswith("META-INF/"):
+                if is_apk_signature_entry(item.filename):
                     continue
                 payload = bytes(so_data) if item.filename == args.so_entry else zin.read(item.filename)
                 zi = zipfile.ZipInfo(item.filename, date_time=item.date_time)
@@ -107,7 +124,7 @@ def main():
                 zout.writestr(zi, payload)
 
     print(f"OK: wrote unsigned APK {args.out_unsigned}")
-    print("Next: sign with your own keystore using apksigner or SignApk before installing.")
+    print("Next: align with `zipalign -p 4` and sign with your own keystore via `apksigner` before installing.")
 
 
 if __name__ == "__main__":

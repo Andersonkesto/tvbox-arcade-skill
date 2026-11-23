@@ -1,8 +1,8 @@
 # TV Box Arcade Skill (`tvbox-arcade-builder`)
 
-[Anderson Machado](https://andersonmachado.web.app/)
+> Site oficial e vitrine interativa: **[andersonmachado.web.app](https://andersonmachado.web.app/)**
 
-Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com **Antigravity**, **Gemini CLI**, **Claude Code** e **Codex**) para transformar TV Boxes Android de baixo custo — especialmente placas **Rockchip RK3229 / RK322x (Android 7.1, 32-bit `armeabi-v7a`, Mali-400, 1 GB RAM, Raw NAND)** — em sistemas dedicados de arcade/multijogos via ADB, sem arriscar brick na NAND interna.
+Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com **Antigravity**, **Gemini CLI**, **Claude Code**, **Cursor**, **Codex** e **GitHub Copilot**) para transformar TV Boxes Android de baixo custo — especialmente placas **Rockchip RK3229 / RK322x (Android 7.1, 32-bit `armeabi-v7a`, Mali-400, 1 GB RAM, Raw NAND)** — em sistemas dedicados de arcade/multijogos via ADB, sem arriscar brick na NAND interna.
 
 ## Galeria de Referência (Hardware & Sistema em Funcionamento)
 
@@ -20,7 +20,7 @@ Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com
 
 ## O que esta skill automatiza
 
-- **Diagnóstico de hardware via ADB:** verifica SoC, arquitetura ABI, SDK do Android, RAM, espaço livre em `/system` e `/data`, armazenamento (`rknand` vs eMMC) e viabilidade de emulação.
+- **Diagnóstico de hardware via ADB (`scripts/audit_tvbox.py`):** verifica em 1 comando read-only SoC, arquitetura ABI, SDK do Android, RAM, espaço livre em `/system` e `/data`, armazenamento (`rknand` vs eMMC), controles USB conectados e viabilidade de emulação.
 - **Stack Arcade otimizada (Android enxuto + RetroArch 32-bit + Pegasus Frontend):**
   - Download de binários oficiais (`RetroArch_ra32`, cores `armeabi-v7a`, `Pegasus Frontend` e tema **RGLegacy** compatível com Qt 5.15).
   - Configuração de vídeo 16:9 em tela cheia (OpenGL ES 2.0 + threaded video, sem controles touch virtuais).
@@ -37,21 +37,32 @@ Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com
 
 ## Como instalar a Skill
 
-### Antigravity / Gemini CLI / Codex / Claude Code
-Clone este repositório e copie a pasta `skills/tvbox-arcade-builder` para o diretório de skills do seu agente:
+### Instalação universal em 1 comando (recomendado)
+Compatível com **Cursor, Claude Code, Codex, Gemini CLI, GitHub Copilot, Windsurf e Antigravity**:
+
+```bash
+# No projeto atual
+npx skills add Andersonkesto/tvbox-arcade-skill
+
+# Global (todas as sessões)
+npx skills add Andersonkesto/tvbox-arcade-skill -g
+```
+
+### Instalação manual via Git ou Release ZIP
+Clone este repositório (ou baixe o `.zip` pronto na aba **Releases**) e copie `skills/tvbox-arcade-builder` para o diretório de skills do seu agente:
 
 ```bash
 git clone https://github.com/Andersonkesto/tvbox-arcade-skill.git
 ```
 
-- **Global (todas as sessões):** copie `skills/tvbox-arcade-builder/` para `~/.gemini/config/skills/tvbox-arcade-builder/` (ou `~/.agents/skills/tvbox-arcade-builder/`).
+- **Global (todas as sessões):** copie `skills/tvbox-arcade-builder/` para `~/.gemini/config/skills/tvbox-arcade-builder/` (Antigravity) ou `~/.agents/skills/tvbox-arcade-builder/` (Gemini CLI / Codex).
 - **Por projeto (workspace):** copie para `.agents/skills/tvbox-arcade-builder/` na raiz do projeto.
 
 ### Dependências no PC (para os scripts auxiliares)
-- **Python 3.10+** com **Pillow** (`pip install pillow`)
+- **Python 3.10+** com **Pillow**: `pip install -r skills/tvbox-arcade-builder/requirements.txt`
 - **ADB (`platform-tools`)** conectado à TV Box via rede ou USB
 - **FFmpeg** (opcional, apenas para conversão de vídeo de boot)
-- **Java JDK + apksigner / SignApk** (opcional, apenas para assinar o APK caso personalize o logo de carregamento do Pegasus)
+- **Java JDK + `zipalign` + `apksigner` / SignApk** (opcional, apenas para alinhar e assinar o APK caso personalize o logo de carregamento do Pegasus)
 
 ---
 
@@ -60,10 +71,6 @@ git clone https://github.com/Andersonkesto/tvbox-arcade-skill.git
 - **Este repositório NÃO contém nem distribui** ROMs, BIOS, músicas, artes proprietárias, APKs de terceiros ou chaves privadas de assinatura.
 - Todo binário de emulador/frontend é obtido pelo próprio usuário diretamente das fontes oficiais (Libretro Buildbot, Pegasus Frontend GitHub Releases, RGLegacy GitHub).
 - **Atenção em placas com Raw NAND (`rknand`):** operações em `/system` ou na partição `rknand_resource` exigem acesso `root` e **backup prévio obrigatório** descrito na skill. Use por sua conta e risco e nunca execute `dd` em partições sem validar o tamanho e o cabeçalho da sua placa.
-
-## Meu Site
-[Anderson Machado](https://andersonmachado.web.app/)
-
 
 ## Créditos e Licenças de Terceiros
 
