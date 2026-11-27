@@ -88,5 +88,36 @@ class TestConfigSyntax(unittest.TestCase):
         self.assertNotIn(zd["input_enable_hotkey_btn"], game_buttons)
 
 
+class TestPortalContent(unittest.TestCase):
+    """docs/portal-content.json feeds the phase cards on the project website."""
+
+    REQUIRED = ("id", "slot", "shortTitle", "title", "subtitle", "summary", "bullets", "commandLabel", "command")
+
+    def test_portal_content_schema(self):
+        path = REPO_ROOT / "docs" / "portal-content.json"
+        if not path.exists():
+            self.skipTest("optional file")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        phases = data.get("phases")
+        self.assertIsInstance(phases, list)
+        self.assertGreater(len(phases), 0)
+        ids = []
+        for i, phase in enumerate(phases):
+            for key in self.REQUIRED:
+                self.assertIn(key, phase, f"phase {i} missing {key}")
+            self.assertIsInstance(phase["bullets"], list, f"phase {i} bullets")
+            self.assertTrue(all(isinstance(b, str) and b for b in phase["bullets"]), f"phase {i} bullets")
+            ids.append(phase["id"])
+        self.assertEqual(len(ids), len(set(ids)), "duplicate phase ids")
+
+    def test_portal_content_mentions_existing_scripts(self):
+        path = REPO_ROOT / "docs" / "portal-content.json"
+        if not path.exists():
+            self.skipTest("optional file")
+        text = path.read_text(encoding="utf-8")
+        for name in set(re.findall(r"scripts/([a-z0-9_]+\.py)", text)):
+            self.assertTrue((SKILL_DIR / "scripts" / name).exists(), f"portal-content.json cites missing {name}")
+
+
 if __name__ == "__main__":
     unittest.main()

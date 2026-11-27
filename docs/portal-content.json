@@ -1,0 +1,82 @@
+{
+  "$comment": "Texto das fases exibido em https://andersonmachado.web.app (secao TV Box Arcade Skill). O site le este arquivo do branch main a cada visita: edite aqui e o portal atualiza sem novo deploy. {version} vira a versao da ultima release.",
+  "phases": [
+    {
+      "id": "audit",
+      "slot": "F1",
+      "shortTitle": "Auditoria ADB",
+      "title": "Fase 1 — Auditoria de Hardware & Escudo Raw NAND",
+      "subtitle": "Diagnóstico read-only antes de qualquer gravação",
+      "summary": "Inspeciona SoC, ABI 32-bit (armeabi-v7a), SDK Android, RAM disponível, tipo de armazenamento e espaço livre antes de alterar o sistema.",
+      "bullets": [
+        "Bloqueia flash cego de Linux/Batocera em placas com Raw NAND (rknand_*), evitando brick sem recuperação Maskrom.",
+        "Valida versão da GPU Mali-400 (OpenGL ES 2.0) e registra o Home launcher original para rollback imediato.",
+        "Exige confirmação explícita antes de remount /system rw, desativação de pacotes ou gravação em bloco.",
+        "Coleta tudo numa única chamada adb shell, incluindo GLES, root, temperatura, pendrives e resolução."
+      ],
+      "commandLabel": "Auditoria ADB read-only em 1 comando ({version})",
+      "command": "python scripts/audit_tvbox.py --serial <IP>:5555 --json"
+    },
+    {
+      "id": "stack",
+      "slot": "F2",
+      "shortTitle": "RetroArch + Pegasus",
+      "title": "Fase 2 — Stack RetroArch ra32 + Tema RGLegacy (Qt 5.15)",
+      "subtitle": "Binários oficiais 32-bit e UI livre de erros QML",
+      "summary": "Instala RetroArch_ra32, cores armeabi-v7a compilados para ARM Cortex-A7 e Pegasus Frontend com tema RGLegacy auditado.",
+      "bullets": [
+        "Usa build 32-bit do Pegasus compatível com API 25 (Android 7.1), evitando falha INSTALL_FAILED_OLDER_SDK.",
+        "Audita QML/JS para Qt 5.15.10 (zero operadores ES2020 ?? ou ?.), adiciona paleta neogeo e oculta ícone de bateria.",
+        "retroarch.cfg em modo quiosque (GLES 2.0, vídeo threaded, áudio 48 kHz, sem salvar ao sair para poupar a NAND) + opções de core dedicadas.",
+        "deploy_tvbox.py roda em dry-run por padrão e grava tvbox_rollback.json; rollback_tvbox.py desfaz e verify_tvbox.py confere o resultado."
+      ],
+      "commandLabel": "Deploy com plano revisável e rollback",
+      "command": "python scripts/deploy_tvbox.py --serial <IP>:5555 --configs            # dry-run: mostra o plano\npython scripts/deploy_tvbox.py --serial <IP>:5555 --configs --apply    # executa e grava rollback\npython scripts/verify_tvbox.py --serial <IP>:5555"
+    },
+    {
+      "id": "usb-media",
+      "slot": "F3",
+      "shortTitle": "ROMs USB & BGM",
+      "title": "Fase 3 — Pendrive USB, Capas & Música Contínua em Qt",
+      "subtitle": "Preserva NAND interna e estabiliza RockFFPlayer",
+      "summary": "Organiza ROMs no pendrive (/storage/<SERIAL>/), gera metadata.pegasus.txt com capas oficiais e cria player BGM resiliente.",
+      "bullets": [
+        "Traduz nomes curtos de ZIPs MAME/FBNeo via DATs XML oficiais e baixa boxfront/screenshot direto de libretro-thumbnails.",
+        "Gera cards visuais 600x600 combinando hardware real do console e logo (build_console_cards.py).",
+        "Gera Music.qml de faixa única em fila embaralhada Fisher-Yates com watchdog de 2s para contornar travamentos do RockFFPlayer."
+      ],
+      "commandLabel": "Sincronizar mídia + gerar Music.qml",
+      "command": "python scripts/sync_usb_media.py --src D:\\ROMs --usb E:\\ROMs --dat fbneo.xml\npython scripts/gen_music_qml.py --music-dir \"./bgm\" --android-music-uri \"file:///storage/<UUID>/music/\" --out ./Music.qml"
+    },
+    {
+      "id": "controls",
+      "slot": "F4",
+      "shortTitle": "Controles & Moedeiro",
+      "title": "Fase 4 — Controles Zero Delay, Dual-Mode & Moedeiro",
+      "subtitle": "Mapeamento 6 botões de luta e ligação segura NO/GND",
+      "summary": "Implanta arquivos Android KeyLayout (.kl) e autoconfig RetroArch (.cfg) específicos para encoders USB arcade e controles PS3/PC.",
+      "bullets": [
+        "Zero Delay (0079:0006): corrige ausência de Vendor_0079_Product_0006.kl no Android 7.1; atalhos (sair do jogo, menu) ficam no botão de serviço K11, longe do pulso do moedeiro.",
+        "Dual-Mode (054c:0268 vs 0e8f:0003): contorna conflito de hid-sony no kernel 3.10 com perfil por nome de dispositivo.",
+        "Moedeiro 12V: liga alimentação 12V externamente e envia apenas contato seco NO + GND ao pino Select da placa USB."
+      ],
+      "commandLabel": "Deploy do perfil Zero Delay 0079:0006",
+      "command": "adb push resources/keylayouts/Vendor_0079_Product_0006.kl /system/usr/keylayout/\nadb push resources/autoconfig/DragonRise_ZeroDelay.cfg \"/sdcard/RetroArch/autoconfig/android/DragonRise Inc.   Generic   USB  Joystick  .cfg\""
+    },
+    {
+      "id": "boot",
+      "slot": "F5",
+      "shortTitle": "Boot & Splash",
+      "title": "Fase 5 — Bootanimation, Logo Kernel RSCE & Splash Pegasus",
+      "subtitle": "Validação dinâmica sem offsets fixos e backup obrigatório",
+      "summary": "Personaliza vídeo bootanimation.ts, bootanimation.zip sem compressão, BMP em rknand_resource e splash interno do Pegasus.",
+      "bullets": [
+        "Remove bootanimation antiga com sync antes de gravar para evitar falta de espaço em partições /system com < 20 MB livres.",
+        "patch_boot_resource.py lê a tabela RSCE, troca logo.bmp e logo_kernel.bmp (24 ou 8 bits) e atualiza os hashes das entradas.",
+        "patch_pegasus_logo.py substitui assets/logo.png na libpegasus-fe_armeabi-v7a.so e, com --keystore, já alinha e assina o APK."
+      ],
+      "commandLabel": "Patch dinâmico com backup prévio obrigatório",
+      "command": "python scripts/patch_boot_resource.py --resource-in resource_backup.img --image custom.png --resource-out resource_patched.img\npython scripts/patch_pegasus_logo.py --apk Pegasus.apk --image custom_logo.png --out-unsigned Pegasus-unsigned.apk"
+    }
+  ]
+}
