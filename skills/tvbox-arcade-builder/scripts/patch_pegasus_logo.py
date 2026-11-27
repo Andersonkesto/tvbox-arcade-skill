@@ -7,7 +7,9 @@ uninstalling the official APK, because re-signing uses a different certificate.
 import argparse
 import io
 import os
+import shutil
 import struct
+import subprocess
 import zipfile
 
 try:
@@ -84,6 +86,15 @@ def main():
         default="lib/armeabi-v7a/libpegasus-fe_armeabi-v7a.so",
         help="APK path to native library",
     )
+    parser.add_argument("--keystore", default="", help="Optional keystore: also run zipalign -p 4 + apksigner")
+    parser.add_argument(
+        "--ks-pass", default="",
+        help="Passed to apksigner --ks-pass (e.g. env:KS_PASS or file:pass.txt). Omit to be prompted.",
+    )
+    parser.add_argument("--ks-alias", default="", help="Optional key alias inside the keystore")
+    parser.add_argument("--out-signed", default="", help="Signed APK path (default: <out-unsigned>-signed.apk)")
+    parser.add_argument("--zipalign", default="zipalign", help="Path to zipalign (Android build-tools)")
+    parser.add_argument("--apksigner", default="apksigner", help="Path to apksigner (Android build-tools)")
     args = parser.parse_args()
 
     im = Image.open(args.image).convert("RGBA")
@@ -124,7 +135,34 @@ def main():
                 zout.writestr(zi, payload)
 
     print(f"OK: wrote unsigned APK {args.out_unsigned}")
-    print("Next: align with `zipalign -p 4` and sign with your own keystore via `apksigner` before installing.")
+    if not args.keystore:
+        print("Next: align with `zipalign -p 4` and sign with your own keystore via `apksigner` before installing.")
+        return
+    signed = args.out_signed or os.path.splitext(args.out_unsigned)[0] + "-signed.apk"
+    align_and_sign(args, signed)
+    print(f"OK: wrote aligned + signed APK {signed}")
+    print("Back up Android/data/org.pegasus_frontend.android/ before uninstalling the official APK.")
+
+
+def resolve_tool(name: str) -> str:
+    found = shutil.which(name) or shutil.which(name + ".bat") or shutil.which(name + ".exe")
+    if not found:
+        raise SystemExit(f"{name} not found: install Android build-tools or pass its full path")
+    return found
+
+
+def align_and_sign(args, signed_path: str) -> None:
+    aligned = os.path.splitext(args.out_unsigned)[0] + "-aligned.apk"
+    subprocess.run([resolve_tool(args.zipalign), "-f", "-p", "4", args.out_unsigned, aligned], check=True)
+    cmd = [resolve_tool(args.apksigner), "sign", "--ks", args.keystore]
+    if args.ks_pass:
+        cmd += ["--ks-pass", args.ks_pass]
+    if args.ks_alias:
+        cmd += ["--ks-key-alias", args.ks_alias]
+    cmd += ["--out", signed_path, aligned]
+    subprocess.run(cmd, check=True)
+    subprocess.run([resolve_tool(args.apksigner), "verify", signed_path], check=True)
+    os.remove(aligned)
 
 
 if __name__ == "__main__":

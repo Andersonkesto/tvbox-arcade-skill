@@ -16,8 +16,6 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 import audit_tvbox
 import patch_boot_resource
-import patch_pegasus_logo
-import sync_usb_media
 
 
 def make_synthetic_bmp(width: int, height: int, top_down: bool = False, color=(20, 40, 80)) -> bytes:
