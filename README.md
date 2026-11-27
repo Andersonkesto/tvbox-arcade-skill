@@ -20,18 +20,20 @@ Skill aberta no padrão [Agent Skills](https://agentskills.io/) (compatível com
 
 ## O que esta skill automatiza
 
-- **Diagnóstico de hardware via ADB (`scripts/audit_tvbox.py`):** verifica em 1 comando read-only SoC, arquitetura ABI, SDK do Android, RAM, espaço livre em `/system` e `/data`, armazenamento (`rknand` vs eMMC), controles USB conectados e viabilidade de emulação.
+- **Diagnóstico de hardware via ADB (`scripts/audit_tvbox.py`):** verifica em 1 comando read-only (uma única chamada `adb shell`) SoC, ABI, SDK do Android, RAM, espaço livre em `/system` e `/data`, armazenamento (`rknand` vs eMMC), GPU/GLES, root, temperatura, pendrives montados, controles USB conectados e viabilidade de emulação.
+- **Deploy com dry-run e rollback (`scripts/deploy_tvbox.py` / `scripts/rollback_tvbox.py`):** instala APKs, cores, configs, tema, keylayouts, ajustes de quiosque do Android, debloat e launcher padrão — só altera a TV Box com `--apply` e grava um `tvbox_rollback.json` para desfazer tudo.
+- **Verificação automática (`scripts/verify_tvbox.py`) e lint de temas (`scripts/lint_qml_theme.py`):** checklist final com código de saída e detecção de sintaxe ES2020+ (`??`, `?.`) que quebra temas no Qt 5.15 do Pegasus.
 - **Stack Arcade otimizada (Android enxuto + RetroArch 32-bit + Pegasus Frontend):**
   - Download de binários oficiais (`RetroArch_ra32`, cores `armeabi-v7a`, `Pegasus Frontend` e tema **RGLegacy** compatível com Qt 5.15).
-  - Configuração de vídeo 16:9 em tela cheia (OpenGL ES 2.0 + threaded video, sem controles touch virtuais).
+  - Configuração de vídeo 16:9 em tela cheia (OpenGL ES 2.0 + threaded video, sem controles touch virtuais), modo quiosque do RetroArch e presets de opções de core para Cortex-A7.
   - Desativação segura (reversível via `pm disable-user`) de apps não essenciais para uso dedicado como console.
 - **Organização de ROMs em pendrive USB/SD + Capas automáticas:**
   - Geração de `metadata.pegasus.txt` (incluindo tradução de nomes de **MAME** e **FBNeo/Neo Geo** via DATs oficiais).
   - Download automatizado de `boxfront.png` e `screenshot.png` direto do repositório público `libretro-thumbnails`.
   - Geração de cards visuais `600x600` combinando fotos de hardware dos consoles com logos oficiais.
 - **Música de fundo em loop contínuo:** gerador de `Music.qml` otimizado para o `RockFFPlayer` (carrega 1 faixa `.ogg`/`.mp3` por vez em fila embaralhada sem repetição + watchdog automático + pausa ao abrir jogos).
-- **Controles USB e Moedeiro:** perfis `.kl` (Android KeyLayout) e `.cfg` (RetroArch) para placas **Zero Delay Arcade (`0079:0006`)** e controles **PS3/PC dual-mode (`054c:0268` / `0e8f:0003`)** com layout de 6 botões de luta, atalho `Select + Start` para sair do jogo e guia elétrico para moedeiro eletrônico.
-- **Personalização segura de Boot e Splash:** scripts com **validação dinâmica** (sem offsets fixos) para trocar `bootanimation.ts`, `bootanimation.zip`, `logo.bmp` na partição `resource` e o `logo.png` da tela de carregamento do Pegasus (com backup obrigatório e rollback documentado).
+- **Controles USB e Moedeiro:** perfis `.kl` (Android KeyLayout) e `.cfg` (RetroArch) para placas **Zero Delay Arcade (`0079:0006`)** e controles **PS3/PC dual-mode (`054c:0268` / `0e8f:0003`)** com layout de 6 botões de luta, hotkeys num botão de serviço (K11) para que o pulso do moedeiro no `Select` nunca feche o jogo, e guia elétrico para moedeiro eletrônico.
+- **Personalização segura de Boot e Splash:** scripts com **validação dinâmica** (sem offsets fixos) para trocar `bootanimation.ts`, `bootanimation.zip`, `logo.bmp` e `logo_kernel.bmp` (24 ou 8 bits) na partição `resource` e o `logo.png` da tela de carregamento do Pegasus (com backup obrigatório e rollback documentado).
 
 ---
 

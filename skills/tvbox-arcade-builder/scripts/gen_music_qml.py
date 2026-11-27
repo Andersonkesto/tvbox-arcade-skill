@@ -2,7 +2,8 @@
 
 Plays one track at a time from a Fisher-Yates shuffled full-deck queue, loops
 continuously, pauses on app background, and uses a 2s watchdog timer so playback
-never silently halts between tracks.
+never silently halts between tracks. When every track fails in a row (e.g. the
+USB drive is missing) it backs off to one retry every 30s.
 """
 import argparse
 import json
@@ -50,6 +51,7 @@ Item {{
     property var queue: []
     property int queuePos: 0
     property bool pausedByApp: false
+    property int errorStreak: 0
 
     function buildShuffledQueue() {{
         var arr = [];
@@ -105,10 +107,19 @@ Item {{
                 nextTimer.restart();
             }}
         }}
-        onError: {{
-            if (playBGM && tracks.length > 1) {{
-                nextTimer.restart();
+        onPlaybackStateChanged: {{
+            if (playbackState === Audio.PlayingState) {{
+                errorStreak = 0;
+                nextTimer.interval = 250;
             }}
+        }}
+        onError: {{
+            if (!playBGM) return;
+            // Back off once every track has failed in a row (missing USB, bad files):
+            // retry every 30s instead of hammering RockFFPlayer every 250ms forever.
+            errorStreak++;
+            nextTimer.interval = errorStreak >= tracks.length ? 30000 : 250;
+            nextTimer.restart();
         }}
         Behavior on volume {{
             NumberAnimation {{ duration: 250; easing.type: Easing.InOutQuad; }}

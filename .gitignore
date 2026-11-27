@@ -40,3 +40,7 @@ tmp/
 dist/
 screen_*.png
 *.log
+
+# Device rollback data written by deploy_tvbox.py
+tvbox_rollback.json*
+tvbox_backup/

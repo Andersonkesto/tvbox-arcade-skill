@@ -3,3 +3,11 @@ general.locale: pt-BR
 general.fullscreen: true
 general.verify-files: true
 providers.androidapps.enabled: false
+providers.steam.enabled: false
+providers.gog.enabled: false
+providers.es2.enabled: false
+providers.launchbox.enabled: false
+providers.logiqx.enabled: false
+providers.lutris.enabled: false
+providers.playnite.enabled: false
+providers.skraper.enabled: false
